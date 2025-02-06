@@ -2,7 +2,7 @@ import cv2
 import numpy as np
 from scipy.interpolate import LinearNDInterpolator
 
-from model import Model
+from src.basic_graphic.model import Model
 
 
 def draw_point(img, coord: np.array):
