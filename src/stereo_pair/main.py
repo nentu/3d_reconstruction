@@ -63,9 +63,12 @@ if __name__ == "__main__":
 
         res = sp.compute_3d(model_r.vertex_list[:, :2], model_l.vertex_list[:, :2])
 
+        res *= -1
+
         res_model = Cube(0)
         res_model.vertex_list = np.array(res)
 
+        _draw_model(plane_shape, model, "origin", False)
         _draw_model(plane_shape, res_model, "res", False)
 
         # _draw_model(plane_shape, model, "camera_center", True)
