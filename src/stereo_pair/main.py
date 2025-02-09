@@ -4,7 +4,7 @@ import numpy as np
 from src.basic_graphic.cube import Cube
 from src.basic_graphic.draw_utils import draw_model, get_depth_map
 from src.basic_graphic.utils import get_intrinsic_matrix, rotate
-
+from src.basic_graphic.model import Model
 from src.stereo_pair.stereo_pair import StereoPair, get_rt_matrix, make_homogeneous
 
 
@@ -20,8 +20,8 @@ if __name__ == "__main__":
     plane_shape = np.array([300, 300])
     camera_angle = (90, 90)
 
-    left_camera_pos = np.array([-30, -10, 0])
-    right_camera_pos = np.array([30, 10, 0])
+    left_camera_pos = np.array([-30, -10, 10])
+    right_camera_pos = np.array([22, 14, -14])
 
     left_camera_rot = np.array([0, 0, 0])
     right_camera_rot = np.array([0, 0, 0])
@@ -50,12 +50,15 @@ if __name__ == "__main__":
     h = 0
     k = 1
 
-    err_rt_matrix = -1 * get_rt_matrix(
+    minus_eye = -1 * np.eye(4, 4)
+    minus_eye[-1][-1] = 1
+
+    err_rt_matrix = get_rt_matrix(
         right_camera_rot + left_camera_rot, right_camera_pos + left_camera_pos
-    )
+    ).dot(minus_eye)
 
     while True:
-        model = Cube(r)  # ObjModel('../graphic/models/cow.obj')
+        model = Cube(r) # ObjModel('../graphic/models/cow.obj')
 
         general_rt_matrix = get_rt_matrix([180, rotation, 0], [0, 0, 300 + shift])
         model.vertex_list = general_rt_matrix.dot(
@@ -86,20 +89,18 @@ if __name__ == "__main__":
             model_r.vertex_list[:, :2],  #  .astype(np.int16),
             model_l.vertex_list[:, :2],  #  .astype(np.int16),
         )
-
-        res = err_rt_matrix.dot(make_homogeneous(res, 1).T).T[:, :3]
-
-        print(res[0])
-        print(model.vertex_list[0])
-
         # res *= -1
+        # res += left_camera_pos + right_camera_pos
+        res = err_rt_matrix.dot(make_homogeneous(res, 1).T).T[:, :3]
 
         res_model = Cube(0)
         res_model.vertex_list = np.array(res)
 
         er = np.abs(model.vertex_list - res)
-        print(np.max(er))
-        # print(np.std(er, axis=0))
+        if np.linalg.norm(er) > 1e-2:
+            print(res[0])
+            print(np.mean(er, axis=0))
+            print(np.std(er, axis=0))
         # print("==")
         _draw_model(plane_shape, res_model, "res")
 
