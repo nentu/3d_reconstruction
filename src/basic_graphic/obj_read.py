@@ -1,4 +1,4 @@
-from model import Model
+from src.basic_graphic.model import Model
 import re
 import numpy as np
 

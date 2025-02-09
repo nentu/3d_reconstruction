@@ -28,8 +28,8 @@ def get_closest_point_and_dist(line1_p1, line1_p2, line2_p1, line2_p2):
     return (p1_value + p2_value) / 2, np.linalg.norm(p2_value - p1_value)
 
 
-def make_homogeneous(coord: np.array):
-    return np.concatenate((coord, np.array([1])), axis=0)
+def make_homogeneous(coord: np.array, axis=0):
+    return np.insert(coord, coord.shape[axis], 1, axis=axis)
 
 
 def get_rt_matrix(rotation: np.array, translation: np.array):
@@ -56,7 +56,6 @@ def _get_camera_point_coords(
 
     camera_coord = camera_rt_matrix.dot(camera_coord)
     virtual_coord = camera_rt_matrix.dot(virtual_coord)
-
     return np.array([camera_coord[:3], virtual_coord[:3]])
 
 
@@ -104,10 +103,12 @@ class StereoPair(object):
         :param point_list2: [u, v] coordinates of the second image
         :return: [(x, y, z)] * n coordinates of the depth
         """
-        return np.array([
-            self.compute_single_point(p1, p2)
-            for p1, p2 in zip(point_list1, point_list2)
-        ])
+        return np.array(
+            [
+                self.compute_single_point(p1, p2)
+                for p1, p2 in zip(point_list1, point_list2)
+            ]
+        )
 
 
 if __name__ == "__main__":
