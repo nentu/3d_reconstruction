@@ -56,6 +56,10 @@ def _get_camera_point_coords(
 
     camera_coord = camera_rt_matrix.dot(camera_coord)
     virtual_coord = camera_rt_matrix.dot(virtual_coord)
+
+    # t = (camera_coord - virtual_coord)[:3]
+    # print("Dir", t / np.linalg.norm(t))
+
     return np.array([camera_coord[:3], virtual_coord[:3]])
 
 

@@ -2,9 +2,9 @@ import cv2
 import numpy as np
 
 from src.basic_graphic.draw_utils import draw_model, get_depth_map
-from src.basic_graphic.obj_read import ObjModel
+from src.basic_graphic.models.obj_read import ObjModel
 from src.basic_graphic.utils import get_intrinsic_matrix, rotate
-from src.basic_graphic.cube import Cube
+from src.basic_graphic.models.cube import Cube
 
 
 if __name__ == "__main__":
