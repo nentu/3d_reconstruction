@@ -25,7 +25,6 @@ if __name__ == "__main__":
 
         # model.vertex_list[:, 1] -= 0.5
 
-
         rotate(model, 180, rotation, 0)
 
         model.vertex_list[:, 2] += 300 + shift
@@ -33,13 +32,12 @@ if __name__ == "__main__":
 
         # plane += 255
 
-        model.apply_tranform(intrinsic_matrix)
-        depth = get_depth_map(plane_shape, model)
-        depth = cv2.cvtColor(depth, cv2.COLOR_GRAY2RGB)
-        draw_model(depth, model)
-        draw_model(plane, model)
+        projected_model = model.apply_tranform(intrinsic_matrix)
 
-        cv2.imshow("res", plane)
+        depth = get_depth_map(plane_shape, projected_model)
+        depth = cv2.cvtColor(depth, cv2.COLOR_GRAY2RGB)
+        draw_model(depth, projected_model)
+
         cv2.imshow("depth", depth)
         if cv2.waitKey(1) == ord("q"):
             break
