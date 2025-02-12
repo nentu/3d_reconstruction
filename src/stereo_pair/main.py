@@ -105,21 +105,55 @@ if __name__ == "__main__":
             print(np.std(er, axis=0))
 
         # Move models for main view
-        scene = np.ones(shape=(*main_plane_shape, 3), dtype=np.uint8) * 255 / 2
+        scene = (
+            np.ones(
+                shape=(*(main_plane_shape * [1, 1.5]).astype(np.int32), 3),
+                dtype=np.uint8,
+            )
+            * 255
+            / 2
+        )
 
+        # Draw full scene
         for model in [res_model, cam1_model, cam2_model]:
             model = model.copy()
             model.vertex_list = apply_matrix_to_model(model, inv_main_rt_matrix)
             projected_matrix = model.apply_tranform(main_intrinsic_matrix)
             draw_model(scene, projected_matrix)
 
-        cv2.imshow("Main", scene)
-        # Draw models
-        _draw_model(main_plane_shape, res_model, "res", main_intrinsic_matrix)
-        _draw_model(camera_plane_shape, model_l, "camera_left", camera_intrinsic_matrix)
-        _draw_model(
-            camera_plane_shape, model_r, "camera_right", camera_intrinsic_matrix
+        # Draw views from camera
+        p_cam1_model = model_l.apply_tranform(camera_intrinsic_matrix)
+        p_cam2_model = model_r.apply_tranform(camera_intrinsic_matrix)
+
+        draw_model(
+            scene[: main_plane_shape[1] // 2, main_plane_shape[0] :], p_cam1_model
         )
+        draw_model(
+            scene[main_plane_shape[1] // 2 :, main_plane_shape[0] :], p_cam2_model
+        )
+
+        cv2.line(
+            scene,
+            (main_plane_shape[0], 0),
+            (main_plane_shape[0], main_plane_shape[1]),
+            (0, 0, 0),
+            2,
+        )
+
+        cv2.line(
+            scene,
+            (main_plane_shape[0], main_plane_shape[1] // 2),
+            ((main_plane_shape[0] * 1.5).astype(np.int32), main_plane_shape[1] // 2),
+            (0, 0, 0),
+            2,
+        )
+        cv2.imshow("Main", scene)
+        # # Draw models
+        # _draw_model(main_plane_shape, res_model, "res", main_intrinsic_matrix)
+        # _draw_model(camera_plane_shape, model_l, "camera_left", camera_intrinsic_matrix)
+        # _draw_model(
+        #     camera_plane_shape, model_r, "camera_right", camera_intrinsic_matrix
+        # )
 
         if cv2.waitKey(1) == ord("q"):
             break
