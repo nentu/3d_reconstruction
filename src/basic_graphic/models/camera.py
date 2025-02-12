@@ -14,12 +14,14 @@ def _gen_edge_seq():
 
 
 def _get_vertex(r):
-    res = [[0, 0, 0]]
-    for x in range(2):
-        for y in range(2):
-            x1 = r / 2 * (2 * x - 1)
-            y1 = r / 2 * (2 * y - 1)
-            res.append([x1, y1, r])
+    _r = r / 2
+    res = [
+        [0, 0, 0],
+        [-_r, _r, r],
+        [_r, _r, r],
+        [_r, -_r, r],
+        [-_r, -_r, r],
+    ]
     return np.array(res)
 
 
