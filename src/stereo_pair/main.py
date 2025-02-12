@@ -2,6 +2,7 @@ import cv2
 import numpy as np
 
 from src.basic_graphic.models.cube import Cube
+from src.basic_graphic.models.camera import Camera
 from src.basic_graphic.draw_utils import draw_model, get_depth_map
 from src.basic_graphic.utils import get_intrinsic_matrix
 from src.stereo_pair.stereo_pair import StereoPair, get_rt_matrix, make_homogeneous
@@ -22,12 +23,17 @@ def get_rt_matrix_pair(pos: np.array, rot: np.array):
     return rt_matrix, inv_rt_matrix
 
 
+def apply_matrix_to_model(model, matrix):
+    return matrix.dot(make_homogeneous(model.vertex_list, 1).T).T[:, :3]
+
+
 if __name__ == "__main__":
     win_size = 400
+
     main_plane_shape = np.array([win_size, win_size])
     camera_plane_shape = main_plane_shape // 2
-
     camera_angle = (90, 90)
+
     main_intrinsic_matrix = get_intrinsic_matrix(*camera_angle, *main_plane_shape)
     camera_intrinsic_matrix = get_intrinsic_matrix(*camera_angle, *camera_plane_shape)
 
@@ -56,25 +62,27 @@ if __name__ == "__main__":
     rotation = 180
 
     while True:
+        # Create cameras models
+        cam1_model = Camera(r / 8)
+        cam2_model = Camera(r / 8)
+        # Create cube model
         model = Cube(r)  # ObjModel('../graphic/models/cow.obj')
+
+        # Move cameras' models
+        cam1_model.vertex_list = apply_matrix_to_model(cam1_model, left_rt_matrix)
+        cam2_model.vertex_list = apply_matrix_to_model(cam2_model, right_rt_matrix)
 
         # Move cube
         cube_rt_matrix = get_rt_matrix([180, rotation, 0], [0, 0, 300])
-        model.vertex_list = cube_rt_matrix.dot(
-            make_homogeneous(model.vertex_list, 1).T
-        ).T[:, :3]
+        model.vertex_list = apply_matrix_to_model(model, cube_rt_matrix)
 
+        # Create cube models copy for each camera
         model_r = model.copy()
         model_l = model.copy()
 
-        # Move cameras
-        model_l.vertex_list = inv_left_rt_matrix.dot(
-            make_homogeneous(model_l.vertex_list, 1).T
-        ).T[:, :3]
-
-        model_r.vertex_list = inv_right_rt_matrix.dot(
-            make_homogeneous(model_r.vertex_list, 1).T
-        ).T[:, :3]
+        # Move cameras' views
+        model_l.vertex_list = apply_matrix_to_model(model_l, inv_left_rt_matrix)
+        model_r.vertex_list = apply_matrix_to_model(model_r, inv_right_rt_matrix)
 
         # Get 3d coordinates
         res = sp.compute_3d(
