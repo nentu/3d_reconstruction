@@ -3,7 +3,7 @@ import numpy as np
 
 from src.basic_graphic.models.cube import Cube
 from src.basic_graphic.models.camera import Camera
-from src.basic_graphic.draw_utils import draw_model, get_depth_map
+from src.basic_graphic.draw_utils import draw_model, get_depth_map, color_list
 from src.basic_graphic.utils import get_intrinsic_matrix
 from src.stereo_pair.stereo_pair import StereoPair, get_rt_matrix, make_homogeneous
 
@@ -38,15 +38,15 @@ if __name__ == "__main__":
     camera_intrinsic_matrix = get_intrinsic_matrix(*camera_angle, *camera_plane_shape)
 
     main_rt_matrix, inv_main_rt_matrix = get_rt_matrix_pair(
-        rot=np.array([-20, 20, 0]), pos=np.array([-130, -130, -230])
+        rot=np.array([-20, 25, 0]), pos=np.array([-130, -130, -230]) / 2
     )
 
     left_rt_matrix, inv_left_rt_matrix = get_rt_matrix_pair(
-        rot=np.array([20, 0, 0]), pos=np.array([-31, 40, 10])
+        rot=np.array([10, 10, 45]), pos=np.array([-31, 50, 0])
     )
 
     right_rt_matrix, inv_right_rt_matrix = get_rt_matrix_pair(
-        rot=np.array([0, 0, 0]), pos=np.array([10, 24, -34])
+        rot=np.array([0, -20, 0]), pos=np.array([100, 24, -45])
     )
 
     # Class instance for 3d coordinates computing
@@ -106,54 +106,53 @@ if __name__ == "__main__":
 
         # Move models for main view
         scene = (
-            np.ones(
+            np.zeros(
                 shape=(*(main_plane_shape * [1, 1.5]).astype(np.int32), 3),
                 dtype=np.uint8,
             )
-            * 255
-            / 2
+            + 255
         )
 
         # Draw full scene
-        for model in [res_model, cam1_model, cam2_model]:
+        for model, color_i in zip([res_model, cam1_model, cam2_model], range(3)):
             model = model.copy()
             model.vertex_list = apply_matrix_to_model(model, inv_main_rt_matrix)
             projected_matrix = model.apply_tranform(main_intrinsic_matrix)
-            draw_model(scene, projected_matrix)
+            draw_model(scene, projected_matrix, color_i + 1)
 
         # Draw views from camera
         p_cam1_model = model_l.apply_tranform(camera_intrinsic_matrix)
         p_cam2_model = model_r.apply_tranform(camera_intrinsic_matrix)
 
         draw_model(
-            scene[: main_plane_shape[1] // 2, main_plane_shape[0] :], p_cam1_model
+            scene[: main_plane_shape[1] // 2, main_plane_shape[0] :], p_cam1_model, 1
         )
         draw_model(
-            scene[main_plane_shape[1] // 2 :, main_plane_shape[0] :], p_cam2_model
+            scene[main_plane_shape[1] // 2 :, main_plane_shape[0] :], p_cam2_model, 1
         )
 
-        cv2.line(
+        cv2.rectangle(
+            scene, (0, 0), (main_plane_shape[0] - 2, scene.shape[0] - 2), color_list[1], 2
+        )
+
+
+        cv2.rectangle(
             scene,
             (main_plane_shape[0], 0),
-            (main_plane_shape[0], main_plane_shape[1]),
-            (0, 0, 0),
+            (scene.shape[1], main_plane_shape[1] // 2 - 1),
+            color_list[2],
             2,
         )
 
-        cv2.line(
+        cv2.rectangle(
             scene,
-            (main_plane_shape[0], main_plane_shape[1] // 2),
-            ((main_plane_shape[0] * 1.5).astype(np.int32), main_plane_shape[1] // 2),
-            (0, 0, 0),
+            (main_plane_shape[0], main_plane_shape[1] // 2 + 1),
+            (scene.shape[1] - 1, main_plane_shape[1] - 1),
+            color_list[3],
             2,
         )
+
         cv2.imshow("Main", scene)
-        # # Draw models
-        # _draw_model(main_plane_shape, res_model, "res", main_intrinsic_matrix)
-        # _draw_model(camera_plane_shape, model_l, "camera_left", camera_intrinsic_matrix)
-        # _draw_model(
-        #     camera_plane_shape, model_r, "camera_right", camera_intrinsic_matrix
-        # )
 
         if cv2.waitKey(1) == ord("q"):
             break
