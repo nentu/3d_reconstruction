@@ -5,6 +5,7 @@ from src.basic_graphic.draw_utils import draw_model, get_depth_map
 from src.basic_graphic.models.obj_read import ObjModel
 from src.basic_graphic.utils import get_intrinsic_matrix, rotate
 from src.basic_graphic.models.cube import Cube
+from src.basic_graphic.models.camera import Camera
 
 
 if __name__ == "__main__":
@@ -21,7 +22,7 @@ if __name__ == "__main__":
     k = 1
 
     while True:
-        model = Cube(99)
+        model = Camera(99)
 
         # model.vertex_list[:, 1] -= 0.5
 

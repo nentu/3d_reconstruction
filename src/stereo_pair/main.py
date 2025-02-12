@@ -16,27 +16,32 @@ def _draw_model(plane_shape, model, name, intrinsic_matrix):
     return projected_matrix
 
 
+def get_rt_matrix_pair(pos: np.array, rot: np.array):
+    rt_matrix = get_rt_matrix(rot, pos)
+    inv_rt_matrix = np.linalg.inv(rt_matrix)
+    return rt_matrix, inv_rt_matrix
+
+
 if __name__ == "__main__":
     win_size = 400
     main_plane_shape = np.array([win_size, win_size])
     camera_plane_shape = main_plane_shape // 2
 
     camera_angle = (90, 90)
-
-    left_camera_pos = np.array([-31, 40, 10])
-    right_camera_pos = np.array([10, 24, -354])
-
-    left_camera_rot = np.array([20, 0, 0])
-    right_camera_rot = np.array([0, 0, 0])
-
     main_intrinsic_matrix = get_intrinsic_matrix(*camera_angle, *main_plane_shape)
     camera_intrinsic_matrix = get_intrinsic_matrix(*camera_angle, *camera_plane_shape)
 
-    left_rt_matrix = get_rt_matrix(left_camera_rot, left_camera_pos)
-    right_rt_matrix = get_rt_matrix(right_camera_rot, right_camera_pos)
+    main_rt_matrix, inv_main_rt_matrix = get_rt_matrix_pair(
+        rot=np.array([0, 0, 0]), pos=np.array([0, 0, 0])
+    )
 
-    inv_left_rt_matrix = np.linalg.inv(left_rt_matrix)
-    inv_right_rt_matrix = np.linalg.inv(right_rt_matrix)
+    left_rt_matrix, inv_left_rt_matrix = get_rt_matrix_pair(
+        rot=np.array([20, 0, 0]), pos=np.array([-31, 40, 10])
+    )
+
+    right_rt_matrix, inv_right_rt_matrix = get_rt_matrix_pair(
+        rot=np.array([0, 0, 0]), pos=np.array([10, 24, -354])
+    )
 
     # Class instance for 3d coordinates computing
     sp = StereoPair(
@@ -93,7 +98,9 @@ if __name__ == "__main__":
         # Draw models
         _draw_model(main_plane_shape, res_model, "res", main_intrinsic_matrix)
         _draw_model(camera_plane_shape, model_l, "camera_left", camera_intrinsic_matrix)
-        _draw_model(camera_plane_shape, model_r, "camera_right", camera_intrinsic_matrix)
+        _draw_model(
+            camera_plane_shape, model_r, "camera_right", camera_intrinsic_matrix
+        )
 
         if cv2.waitKey(1) == ord("q"):
             break
