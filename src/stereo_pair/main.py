@@ -38,7 +38,7 @@ if __name__ == "__main__":
     camera_intrinsic_matrix = get_intrinsic_matrix(*camera_angle, *camera_plane_shape)
 
     main_rt_matrix, inv_main_rt_matrix = get_rt_matrix_pair(
-        rot=np.array([0, 0, 0]), pos=np.array([0, 0, 0])
+        rot=np.array([-20, 20, 0]), pos=np.array([-130, -130, -230])
     )
 
     left_rt_matrix, inv_left_rt_matrix = get_rt_matrix_pair(
@@ -46,7 +46,7 @@ if __name__ == "__main__":
     )
 
     right_rt_matrix, inv_right_rt_matrix = get_rt_matrix_pair(
-        rot=np.array([0, 0, 0]), pos=np.array([10, 24, -354])
+        rot=np.array([0, 0, 0]), pos=np.array([10, 24, -34])
     )
 
     # Class instance for 3d coordinates computing
@@ -60,13 +60,14 @@ if __name__ == "__main__":
     r = 99  # Cube size
 
     rotation = 180
+    pose = 0
 
     while True:
         # Create cameras models
-        cam1_model = Camera(r / 8)
-        cam2_model = Camera(r / 8)
+        cam1_model = Camera(r / 4)
+        cam2_model = Camera(r / 4)
         # Create cube model
-        model = Cube(r)  # ObjModel('../graphic/models/cow.obj')
+        obj_model = Cube(r)  # ObjModel('../graphic/models/cow.obj')
 
         # Move cameras' models
         cam1_model.vertex_list = apply_matrix_to_model(cam1_model, left_rt_matrix)
@@ -74,11 +75,11 @@ if __name__ == "__main__":
 
         # Move cube
         cube_rt_matrix = get_rt_matrix([180, rotation, 0], [0, 0, 300])
-        model.vertex_list = apply_matrix_to_model(model, cube_rt_matrix)
+        obj_model.vertex_list = apply_matrix_to_model(obj_model, cube_rt_matrix)
 
         # Create cube models copy for each camera
-        model_r = model.copy()
-        model_l = model.copy()
+        model_r = obj_model.copy()
+        model_l = obj_model.copy()
 
         # Move cameras' views
         model_l.vertex_list = apply_matrix_to_model(model_l, inv_left_rt_matrix)
@@ -97,12 +98,22 @@ if __name__ == "__main__":
         res_model.vertex_list = np.array(res)
 
         # Compute error
-        er = np.abs(model.vertex_list - res)
+        er = np.abs(obj_model.vertex_list - res)
         if np.linalg.norm(er) > 1e-2:
             print("Failed")
             print(np.mean(er, axis=0).astype(np.int16))
             print(np.std(er, axis=0))
 
+        # Move models for main view
+        scene = np.ones(shape=(*main_plane_shape, 3), dtype=np.uint8) * 255 / 2
+
+        for model in [res_model, cam1_model, cam2_model]:
+            model = model.copy()
+            model.vertex_list = apply_matrix_to_model(model, inv_main_rt_matrix)
+            projected_matrix = model.apply_tranform(main_intrinsic_matrix)
+            draw_model(scene, projected_matrix)
+
+        cv2.imshow("Main", scene)
         # Draw models
         _draw_model(main_plane_shape, res_model, "res", main_intrinsic_matrix)
         _draw_model(camera_plane_shape, model_l, "camera_left", camera_intrinsic_matrix)
@@ -114,5 +125,6 @@ if __name__ == "__main__":
             break
 
         rotation += 0.1
+        pose += 0
 
     cv2.destroyAllWindows()
