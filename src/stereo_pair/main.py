@@ -28,7 +28,7 @@ def apply_matrix_to_model(model, matrix):
 
 
 if __name__ == "__main__":
-    win_size = 400
+    win_size = 800
 
     main_plane_shape = np.array([win_size, win_size])
     camera_plane_shape = main_plane_shape // 2
@@ -61,8 +61,7 @@ if __name__ == "__main__":
 
     rotation = 180
     pose = 0
-
-    while True:
+    while True:  # rotation < 180 + 90:
         # Create cameras models
         cam1_model = Camera(r / 4)
         cam2_model = Camera(r / 4)
@@ -87,19 +86,19 @@ if __name__ == "__main__":
 
         # Get 3d coordinates
         res = sp.compute_3d(
-            model_l.apply_tranform(camera_intrinsic_matrix).vertex_list[
-                :, :2
-            ],  #  .astype(np.int16),
-            model_r.apply_tranform(camera_intrinsic_matrix).vertex_list[
-                :, :2
-            ],  #  .astype(np.int16),
+            model_l.apply_tranform(camera_intrinsic_matrix)
+            .vertex_list[:, :2]
+            .astype(np.int16),
+            model_r.apply_tranform(camera_intrinsic_matrix)
+            .vertex_list[:, :2]
+            .astype(np.int16),
         )
         res_model = Cube(r)
         res_model.vertex_list = np.array(res)
 
         # Compute error
         er = np.abs(obj_model.vertex_list - res)
-        if np.linalg.norm(er) > 1e-2:
+        if np.linalg.norm(er) > 1e1:
             print("Failed")
             print(np.mean(er, axis=0).astype(np.int16))
             print(np.std(er, axis=0))
@@ -114,11 +113,16 @@ if __name__ == "__main__":
         )
 
         # Draw full scene
-        for model, color_i in zip([res_model, cam1_model, cam2_model], range(3)):
+        for model, color_i in zip(
+            [obj_model, res_model, cam1_model, cam2_model], range(4)
+        ):
             model = model.copy()
             model.vertex_list = apply_matrix_to_model(model, inv_main_rt_matrix)
             projected_matrix = model.apply_tranform(main_intrinsic_matrix)
-            draw_model(scene, projected_matrix, color_i + 1)
+            if color_i == 0:
+                draw_model(scene, projected_matrix, color_i + 1, 10)
+            else:
+                draw_model(scene, projected_matrix, color_i + 1)
 
         # Draw views from camera
         p_cam1_model = model_l.apply_tranform(camera_intrinsic_matrix)
@@ -132,24 +136,27 @@ if __name__ == "__main__":
         )
 
         cv2.rectangle(
-            scene, (0, 0), (main_plane_shape[0] - 2, scene.shape[0] - 2), color_list[1], 2
+            scene,
+            (0, 0),
+            (main_plane_shape[0] - 2, scene.shape[0] - 2),
+            color_list[1],
+            2,
         )
-
 
         cv2.rectangle(
             scene,
             (main_plane_shape[0], 0),
             (scene.shape[1], main_plane_shape[1] // 2 - 1),
-            color_list[2],
-            2,
+            color_list[3],
+            3,
         )
 
         cv2.rectangle(
             scene,
             (main_plane_shape[0], main_plane_shape[1] // 2 + 1),
             (scene.shape[1] - 1, main_plane_shape[1] - 1),
-            color_list[3],
-            2,
+            color_list[4],
+            3,
         )
 
         cv2.imshow("Main", scene)

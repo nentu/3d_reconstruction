@@ -9,7 +9,7 @@ def _gen_edge_seq():
 
     for i in range(4):  # vertical lines
         res.append([0, i + 1])
-
+    res.append([0, 5])
     return np.array(res)
 
 
@@ -21,8 +21,9 @@ def _get_vertex(r):
         [_r, _r, r],
         [_r, -_r, r],
         [-_r, -_r, r],
+        [0, -_r * 1.2, r],
     ]
-    return np.array(res)
+    return np.array(res).astype(np.int32)
 
 
 class Camera(Model):

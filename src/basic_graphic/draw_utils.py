@@ -8,19 +8,19 @@ color_list = np.random.randint(10, 250, size=(100, 3)).astype(np.uint8).tolist()
 
 
 def draw_point(img, coord: np.array, color_id=0):
-    cv2.circle(img, coord, 1, color_list[color_id], -1)
+    cv2.circle(img, coord, 3, color_list[color_id], -1)
 
 
-def draw_line(img, p1, p2, color_id=0):
+def draw_line(img, p1, p2, color_id=0, width=2):
     # print(tuple(color_list[color_id]))
-    cv2.line(img, p1, p2, color_list[color_id], 1, 1, 0)
+    cv2.line(img, p1, p2, color_list[color_id], width, 1, 0)
 
 
 def draw_poly(img, points, color_id=0):
     cv2.fillPoly(img, [points], color_list[color_id], 1, 1, 1)
 
 
-def draw_model(plane, model: Model, color_id=0):
+def draw_model(plane, model: Model, color_id=0, width=2):
     vertex_list = model.vertex_list.astype(np.int32)
     vertex_list = vertex_list[vertex_list[:, 2] > 0]
     #
@@ -30,7 +30,7 @@ def draw_model(plane, model: Model, color_id=0):
     #     draw_line(plane, *vertex_list[[p2, p3]][:, :2])
 
     for edges in model.edges_list_id:
-        draw_line(plane, *vertex_list[edges][:, :2], color_id)
+        draw_line(plane, *vertex_list[edges][:, :2], color_id, width)
 
     for i in vertex_list:
         draw_point(plane, i[:2], -color_id)
