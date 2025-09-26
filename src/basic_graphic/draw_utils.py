@@ -2,16 +2,22 @@ import cv2
 import numpy as np
 from scipy.interpolate import LinearNDInterpolator
 
-from src.basic_graphic.models.model import Model
+from models.model import Model
 
-color_list = np.random.randint(10, 250, size=(100, 3)).astype(np.uint8).tolist()
+# color_list = np.random.randint(10, 250, size=(100, 3)).astype(np.uint8).tolist()
+color_list = [[int(c)] * 3 for c in np.linspace(0, 255, 100)] + [
+    [0, 0, 255],
+    [0, 255, 0],
+    [0, 255, 255],
+    [255, 255, 0],
+]
 
 
 def draw_point(img, coord: np.array, color_id=0):
     cv2.circle(img, coord, 3, color_list[color_id], -1)
 
 
-def draw_line(img, p1, p2, color_id=0, width=2):
+def draw_line(img, p1, p2, color_id=-1, width=2):
     # print(tuple(color_list[color_id]))
     cv2.line(img, p1, p2, color_list[color_id], width, 1, 0)
 
@@ -33,7 +39,7 @@ def draw_model(plane, model: Model, color_id=0, width=2):
         draw_line(plane, *vertex_list[edges][:, :2], color_id, width)
 
     for i in vertex_list:
-        draw_point(plane, i[:2], -color_id)
+        draw_point(plane, i[:2], color_id)
 
 
 def get_depth_map(plane_shape, model):

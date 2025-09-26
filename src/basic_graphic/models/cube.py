@@ -1,4 +1,4 @@
-from src.basic_graphic.models.model import Model
+from models.model import Model
 import numpy as np
 
 
@@ -51,7 +51,7 @@ def _get_cube(r):
             [r, r, -r],
             [-r, r, -r],
             [-r, -r, -r],
-            [r, -r, -r]
+            [r, -r, -r],
         ]
     ).astype(np.float32)
 

@@ -6,7 +6,7 @@
         {
             "label": "basic graphic",
             "type": "shell",
-            "command": "python3 -m src.basic_graphic.main ./src/basic_graphic/main.py",
+            "command": "python3 -m basic_graphic.main ./src/basic_graphic/main.py",
         },
         {
             "label": "stereo pair",

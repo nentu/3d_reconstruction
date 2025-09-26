@@ -1,15 +1,15 @@
 import cv2
 import numpy as np
 
-from src.basic_graphic.models.cube import Cube
-from src.basic_graphic.models.camera import Camera
-from src.basic_graphic.draw_utils import draw_model, get_depth_map, color_list
-from src.basic_graphic.utils import get_intrinsic_matrix
+from .models.cube import Cube
+from .models.camera import Camera
+from .draw_utils import draw_model, get_depth_map, color_list
+from .utils import get_intrinsic_matrix
 from src.stereo_pair.stereo_pair import StereoPair, get_rt_matrix, make_homogeneous
 
 
 def _draw_model(plane_shape, model, name, intrinsic_matrix):
-    projected_matrix = model.apply_tranform(intrinsic_matrix)
+    projected_matrix = model.apply_transform(intrinsic_matrix)
     plane = get_depth_map(plane_shape, projected_matrix)
     plane += 255
     draw_model(plane, projected_matrix)
@@ -86,10 +86,10 @@ if __name__ == "__main__":
 
         # Get 3d coordinates
         res = sp.compute_3d(
-            model_l.apply_tranform(camera_intrinsic_matrix)
+            model_l.apply_transform(camera_intrinsic_matrix)
             .vertex_list[:, :2]
             .astype(np.int16),
-            model_r.apply_tranform(camera_intrinsic_matrix)
+            model_r.apply_transform(camera_intrinsic_matrix)
             .vertex_list[:, :2]
             .astype(np.int16),
         )
@@ -118,15 +118,15 @@ if __name__ == "__main__":
         ):
             model = model.copy()
             model.vertex_list = apply_matrix_to_model(model, inv_main_rt_matrix)
-            projected_matrix = model.apply_tranform(main_intrinsic_matrix)
+            projected_matrix = model.apply_transform(main_intrinsic_matrix)
             if color_i == 0:
                 draw_model(scene, projected_matrix, color_i + 1, 10)
             else:
                 draw_model(scene, projected_matrix, color_i + 1)
 
         # Draw views from camera
-        p_cam1_model = model_l.apply_tranform(camera_intrinsic_matrix)
-        p_cam2_model = model_r.apply_tranform(camera_intrinsic_matrix)
+        p_cam1_model = model_l.apply_transform(camera_intrinsic_matrix)
+        p_cam2_model = model_r.apply_transform(camera_intrinsic_matrix)
 
         draw_model(
             scene[: main_plane_shape[1] // 2, main_plane_shape[0] :], p_cam1_model, 1

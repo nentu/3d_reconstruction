@@ -1,11 +1,11 @@
 import cv2
 import numpy as np
 
-from src.basic_graphic.draw_utils import draw_model, get_depth_map
-from src.basic_graphic.models.obj_read import ObjModel
-from src.basic_graphic.utils import get_intrinsic_matrix, rotate
-from src.basic_graphic.models.cube import Cube
-from src.basic_graphic.models.camera import Camera
+from draw_utils import draw_model, get_depth_map
+from models.obj_read import ObjModel
+from utils import get_intrinsic_matrix, rotate
+from models.cube import Cube
+from models.camera import Camera
 
 
 if __name__ == "__main__":
@@ -33,7 +33,7 @@ if __name__ == "__main__":
 
         # plane += 255
 
-        projected_model = model.apply_tranform(intrinsic_matrix)
+        projected_model = model.apply_transform(intrinsic_matrix)
 
         depth = get_depth_map(plane_shape, projected_model)
         depth = cv2.cvtColor(depth, cv2.COLOR_GRAY2RGB)

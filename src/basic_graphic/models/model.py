@@ -8,7 +8,7 @@ class Model:
     edges_list_id: np.array
     poly_list_id: np.array
 
-    def apply_tranform(self, matrix: np.array, inline=False):
+    def apply_transform(self, matrix: np.array, inline=False):
         if inline:
             self.vertex_list = matrix.dot(self.vertex_list.T).T
             self.vertex_list[:, :2] = self.vertex_list[:, :2] / np.expand_dims(

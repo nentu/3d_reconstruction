@@ -17,6 +17,8 @@ def project_point(intrinsic_matrix, point):
     return uv[:2] / uv[2]
 
 
-def rotate(model, x, y, z):
+def rotate(model, x, y, z, invert=False):
     matrix = Rotation.from_euler("zyx", [z, y, x], degrees=True).as_matrix()
+    if invert:
+        matrix = np.linalg.inv(matrix)
     model.vertex_list = model.vertex_list.dot(matrix)
